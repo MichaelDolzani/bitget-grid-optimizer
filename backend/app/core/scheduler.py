@@ -3,6 +3,7 @@ import logging
 import time
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 log = logging.getLogger(__name__)
@@ -30,7 +31,11 @@ def _reload_bot_jobs(db_factory):
     db = db_factory()
     try:
         bots = db.query(Bot).filter(Bot.active == True).all()
-        active_ids = {f"optimize_{b.id}" for b in bots} | {f"fund_{b.id}" for b in bots}
+        active_ids = (
+            {f"optimize_{b.id}" for b in bots}
+            | {f"fund_{b.id}" for b in bots}
+            | {f"summary_{b.id}" for b in bots}
+        )
 
         for job in _scheduler.get_jobs():
             if job.id not in active_ids:
@@ -59,6 +64,16 @@ def _reload_bot_jobs(db_factory):
                     id=fund_id,
                     args=[bot.id, db_factory],
                 )
+
+            summary_hour = cfg.get("daily_summary_hour", 8)
+            summary_id = f"summary_{bot.id}"
+            if not _scheduler.get_job(summary_id):
+                _scheduler.add_job(
+                    _run_daily_summary,
+                    trigger=CronTrigger(hour=summary_hour, minute=0, timezone="UTC"),
+                    id=summary_id,
+                    args=[bot.id, db_factory],
+                )
     finally:
         db.close()
 
@@ -66,6 +81,77 @@ def _reload_bot_jobs(db_factory):
 def _run_fund_check(bot_id: int, db_factory):
     from .fund_manager import run_fund_check
     run_fund_check(bot_id, db_factory)
+
+
+def _run_daily_summary(bot_id: int, db_factory):
+    from ..models import Bot, Event, PnlSnapshot
+    from datetime import timedelta, timezone
+    import traceback
+
+    db = db_factory()
+    try:
+        bot = db.query(Bot).filter(Bot.id == bot_id).first()
+        if not bot or not bot.active:
+            return
+
+        cfg = json.loads(bot.config_json or "{}")
+        webhook = cfg.get("gchat_webhook_url", "")
+        if not webhook or not cfg.get("notify_daily_summary", True):
+            return
+
+        since = datetime.now(tz=timezone.utc) - timedelta(hours=24)
+
+        # PnL delta over last 24h
+        snapshots = (
+            db.query(PnlSnapshot)
+            .filter(PnlSnapshot.bot_id == bot_id, PnlSnapshot.created_at >= since)
+            .order_by(PnlSnapshot.created_at.asc())
+            .all()
+        )
+        if len(snapshots) >= 2:
+            pnl_start = snapshots[0].total_pnl
+            pnl_end   = snapshots[-1].total_pnl
+            pnl_24h   = pnl_end - pnl_start
+            base      = snapshots[0].invest_amount or 1.0
+            pnl_pct   = (pnl_24h / base) * 100
+        else:
+            pnl_24h = pnl_pct = 0.0
+
+        shifts = (
+            db.query(Event)
+            .filter(
+                Event.bot_id == bot_id,
+                Event.event_type.in_(["SHIFT_TRIGGERED", "SHIFT_RECOMMENDED"]),
+                Event.created_at >= since,
+            )
+            .count()
+        )
+        funds_added = (
+            db.query(Event)
+            .filter(
+                Event.bot_id == bot_id,
+                Event.event_type == "FUNDS_ADDED",
+                Event.created_at >= since,
+            )
+            .count()
+        )
+
+        from ..notifications.gchat import send_daily_summary
+        send_daily_summary(
+            webhook_url=webhook,
+            symbol=bot.symbol,
+            pnl_24h=pnl_24h,
+            pnl_pct=pnl_pct,
+            shifts=shifts,
+            funds_added=funds_added,
+            grid_num=bot.current_grid_num,
+        )
+        log.info(f"Bot {bot_id}: daily summary sent")
+
+    except Exception:
+        log.error(f"Bot {bot_id} daily summary error: {traceback.format_exc()}")
+    finally:
+        db.close()
 
 
 def _run_optimize(bot_id: int, db_factory):
