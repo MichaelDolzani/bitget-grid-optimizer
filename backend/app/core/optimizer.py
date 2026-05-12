@@ -140,4 +140,15 @@ def _compute_range(
 ) -> tuple[float, float, int]:
     new_upper = price + half_range
     new_lower = price - half_range
-    return new_lower, new_upper, config.max_grid_count
+    return new_lower, new_upper, _optimal_grid_num(config, half_range, price)
+
+
+def _optimal_grid_num(config: BotConfig, half_range: float, price: float) -> int:
+    """Compute grid count so each cell is step_target_pct % of mid-price.
+    Clamped between 2 (minimum viable grid) and max_grid_count (safety cap).
+    """
+    step_usdt = price * config.step_target_pct / 100
+    if step_usdt <= 0:
+        return config.max_grid_count
+    raw = (2 * half_range) / step_usdt
+    return max(2, min(config.max_grid_count, round(raw)))
