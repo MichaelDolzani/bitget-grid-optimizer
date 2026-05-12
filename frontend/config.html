@@ -576,7 +576,18 @@
             <input type="checkbox" x-model="form.notify.events.errors" />
             Errori
           </label>
+          <label class="checkbox-item">
+            <input type="checkbox" x-model="form.notify.events.daily_summary" />
+            Riepilogo giornaliero
+          </label>
         </div>
+      </div>
+
+      <div class="form-group" x-show="form.notify.events.daily_summary" style="margin-top:1rem;">
+        <label class="form-label">Ora di invio riepilogo (UTC)</label>
+        <input class="form-input" type="number" x-model.number="form.notify.daily_hour"
+               min="0" max="23" step="1" style="max-width:120px;" />
+        <p class="form-note">0–23 (ora UTC). Default: 08:00 UTC.</p>
       </div>
 
       <div class="btn-row">
@@ -637,11 +648,13 @@
           },
           notify: {
             webhook_url: '',
+            daily_hour: 8,
             events: {
               shift_range:      true,
               funds_added:      true,
               ttm_squeeze_skip: true,
               errors:           true,
+              daily_summary:    true,
             }
           }
         },
@@ -676,6 +689,8 @@
             notify_funds_added:         this.form.notify.events.funds_added,
             notify_ttm_squeeze_skip:    this.form.notify.events.ttm_squeeze_skip,
             notify_errors:              this.form.notify.events.errors,
+            notify_daily_summary:       this.form.notify.events.daily_summary,
+            daily_summary_hour:         this.form.notify.daily_hour,
           };
         },
 
@@ -726,6 +741,8 @@
             this.form.notify.events.funds_added           = cfg.notify_funds_added      ?? true;
             this.form.notify.events.ttm_squeeze_skip      = cfg.notify_ttm_squeeze_skip ?? true;
             this.form.notify.events.errors                = cfg.notify_errors           ?? true;
+            this.form.notify.events.daily_summary         = cfg.notify_daily_summary    ?? true;
+            this.form.notify.daily_hour                   = cfg.daily_summary_hour      ?? 8;
           } catch { /* use defaults */ }
         },
 
