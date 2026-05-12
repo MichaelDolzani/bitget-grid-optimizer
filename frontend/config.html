@@ -672,6 +672,10 @@
             reserve_pct:                this.form.funds.reserve_pct,
             fund_check_interval_hours:  this.form.funds.check_interval_hours,
             gchat_webhook_url:          this.form.notify.webhook_url,
+            notify_shift_range:         this.form.notify.events.shift_range,
+            notify_funds_added:         this.form.notify.events.funds_added,
+            notify_ttm_squeeze_skip:    this.form.notify.events.ttm_squeeze_skip,
+            notify_errors:              this.form.notify.events.errors,
           };
         },
 
@@ -717,7 +721,11 @@
             this.form.funds.min_threshold         = cfg.min_add_funds_usdt   ?? 10;
             this.form.funds.reserve_pct           = cfg.reserve_pct          ?? 2;
             this.form.funds.check_interval_hours  = cfg.fund_check_interval_hours ?? 6;
-            this.form.notify.webhook_url          = cfg.gchat_webhook_url    ?? '';
+            this.form.notify.webhook_url                  = cfg.gchat_webhook_url       ?? '';
+            this.form.notify.events.shift_range           = cfg.notify_shift_range      ?? true;
+            this.form.notify.events.funds_added           = cfg.notify_funds_added      ?? true;
+            this.form.notify.events.ttm_squeeze_skip      = cfg.notify_ttm_squeeze_skip ?? true;
+            this.form.notify.events.errors                = cfg.notify_errors           ?? true;
           } catch { /* use defaults */ }
         },
 
