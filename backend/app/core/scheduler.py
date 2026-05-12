@@ -77,6 +77,8 @@ def _run_optimize(bot_id: int, db_factory):
     from ..config import settings
     import traceback
 
+    bot = None
+    cfg_dict: dict = {}
     db = db_factory()
     try:
         bot = db.query(Bot).filter(Bot.id == bot_id).first()
@@ -131,6 +133,7 @@ def _run_optimize(bot_id: int, db_factory):
         ))
         db.commit()
 
+        shift_result = None
         if decision.should_shift:
             before = {"lower": state.lower_price, "upper": state.upper_price, "grid_num": state.grid_num}
             after = {"lower": decision.new_lower, "upper": decision.new_upper, "grid_num": decision.new_grid_num}
@@ -146,11 +149,13 @@ def _run_optimize(bot_id: int, db_factory):
                 bot.current_lower_price = decision.new_lower
                 bot.current_upper_price = decision.new_upper
                 bot.current_grid_num = decision.new_grid_num
+                shift_result = "triggered"
                 log.info(f"Bot {bot.id} ({bot.symbol}): shift triggered {before} -> {after}")
             except BitgetAPIError as api_err:
                 # modify-grid not available for spot bots — record recommendation only.
                 db.add(Event(bot_id=bot.id, event_type="SHIFT_RECOMMENDED",
                              before_json=json.dumps(before), after_json=json.dumps(after)))
+                shift_result = "recommended"
                 log.warning(f"Bot {bot.id}: shift recommended but API unavailable: {api_err}")
             db.commit()
         elif decision.reason == "TTM_SQUEEZE":
@@ -162,7 +167,7 @@ def _run_optimize(bot_id: int, db_factory):
             log.info(f"Bot {bot.id}: no shift ({decision.reason})")
 
         # Send notification
-        _notify(bot, decision, cfg_dict)
+        _notify(bot, decision, cfg_dict, shift_result=shift_result)
 
     except Exception as e:
         log.error(f"Bot {bot_id} optimize error: {traceback.format_exc()}")
@@ -170,24 +175,43 @@ def _run_optimize(bot_id: int, db_factory):
         db.add(Event(bot_id=bot_id, event_type="ERROR",
                      before_json="{}", after_json=json.dumps({"error": str(e)})))
         db.commit()
+        if bot is not None:
+            _notify_error(bot, cfg_dict, str(e))
     finally:
         db.close()
 
 
-def _notify(bot, decision, cfg_dict):
+def _notify(bot, decision, cfg_dict, shift_result=None):
     webhook = cfg_dict.get("gchat_webhook_url", "")
     if not webhook:
         return
     try:
         from ..notifications.gchat import send as gchat_send
         if decision.should_shift:
-            msg = (f"[SHIFT] {bot.symbol}: range [{decision.new_lower:,.0f} -> {decision.new_upper:,.0f}] "
-                   f"(was [{decision.current_lower:,.0f} -> {decision.current_upper:,.0f}]). "
-                   f"Grid: {decision.new_grid_num} (was {decision.current_grid_num})")
+            if not cfg_dict.get("notify_shift_range", True):
+                return
+            label = "[SHIFT ESEGUITO]" if shift_result == "triggered" else "[SHIFT RACCOMANDATO]"
+            msg = (f"{label} {bot.symbol}: "
+                   f"[{decision.new_lower:,.0f} → {decision.new_upper:,.0f}] "
+                   f"(era [{decision.current_lower:,.0f} → {decision.current_upper:,.0f}]). "
+                   f"Grid: {decision.new_grid_num} (era {decision.current_grid_num})")
         elif decision.reason == "TTM_SQUEEZE":
-            msg = f"[PAUSE] {bot.symbol}: shift skipped -- market in compression. Monitoring active."
+            if not cfg_dict.get("notify_ttm_squeeze_skip", True):
+                return
+            msg = f"[PAUSA] {bot.symbol}: shift saltato — mercato in compressione. Monitoring attivo."
         else:
             return
         gchat_send(webhook, msg)
+    except Exception:
+        pass
+
+
+def _notify_error(bot, cfg_dict: dict, error_msg: str):
+    webhook = cfg_dict.get("gchat_webhook_url", "")
+    if not webhook or not cfg_dict.get("notify_errors", True):
+        return
+    try:
+        from ..notifications.gchat import send as gchat_send
+        gchat_send(webhook, f"[ERRORE] {bot.symbol} (bot {bot.id}): {error_msg}")
     except Exception:
         pass

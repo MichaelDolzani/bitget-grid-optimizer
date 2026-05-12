@@ -93,11 +93,11 @@ def run_fund_check(bot_id: int, db_factory):
 
 def _notify_funds(bot, cfg_dict, usdt_added, new_invest):
     webhook = cfg_dict.get("gchat_webhook_url", "")
-    if not webhook:
+    if not webhook or not cfg_dict.get("notify_funds_added", True):
         return
     try:
         from ..notifications.gchat import send as gchat_send
-        msg = f"[FUNDS] {bot.symbol}: +{usdt_added:.2f} USDT added. Total capital: {new_invest:,.2f} USDT"
+        msg = f"[FONDI] {bot.symbol}: +{usdt_added:.2f} USDT aggiunti. Capitale totale: {new_invest:,.2f} USDT"
         gchat_send(webhook, msg)
     except Exception:
         pass
