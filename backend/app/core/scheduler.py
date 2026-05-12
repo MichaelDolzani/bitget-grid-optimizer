@@ -209,6 +209,7 @@ def _run_optimize(bot_id: int, db_factory):
         decision = decide(indicators, state, config, atr14_avg20=0.0)
 
         # PnL snapshot — committed independently so it's never lost on shift errors.
+        # Also sync the algorithm-computed grid_num to DB on every cycle.
         db.add(PnlSnapshot(
             bot_id=bot.id,
             total_pnl=0.0,
@@ -217,6 +218,7 @@ def _run_optimize(bot_id: int, db_factory):
             price=indicators.price,
             invest_amount=state.invest_amount,
         ))
+        bot.current_grid_num = decision.new_grid_num
         db.commit()
 
         shift_result = None

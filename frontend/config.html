@@ -414,17 +414,11 @@
                  step="any" :readonly="!!botId" placeholder="es. 120000" />
         </div>
       </div>
-      <div class="form-row-2">
-        <div class="form-group">
-          <label class="form-label">Grid Count</label>
-          <input class="form-input" type="number" x-model.number="form.grid_num"
-                 step="1" min="2" :readonly="!!botId" placeholder="es. 50" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Invest Amount (USDT)</label>
-          <input class="form-input" type="number" x-model.number="form.invest_amount"
-                 step="any" :readonly="!!botId" placeholder="es. 1000" />
-        </div>
+      <div class="form-group">
+        <label class="form-label">Invest Amount (USDT)</label>
+        <input class="form-input" type="number" x-model.number="form.invest_amount"
+               step="any" :readonly="!!botId" placeholder="es. 1000" />
+        <p class="form-note">Il numero di grid viene calcolato automaticamente dall'optimizer ad ogni ciclo.</p>
       </div>
 
       <div class="btn-row">
@@ -626,13 +620,12 @@
           passphrase:    '',
           lower_price:   0,
           upper_price:   0,
-          grid_num:      0,
           invest_amount: 0,
 
           params: {
             atr_multiplier:       2.5,
             sigma_multiplier:     1.5,
-            step_target_pct:      0.8,
+            step_target_pct:      0.3,
             max_grid_count:       150,
             shift_threshold_pct:  5.0,
             cooldown_min:         60,
@@ -662,7 +655,7 @@
         sliders: [
           { key: 'atr_multiplier',      label: 'ATR Multiplier',       min: 1.0, max: 4.0,  step: 0.1 },
           { key: 'sigma_multiplier',    label: 'Sigma Multiplier',     min: 0.5, max: 3.0,  step: 0.1 },
-          { key: 'step_target_pct',     label: 'Step Target %',        min: 0.4, max: 2.0,  step: 0.1 },
+          { key: 'step_target_pct',     label: 'Step per cella % (↓ = più grid)',  min: 0.1, max: 1.0,  step: 0.05 },
           { key: 'max_grid_count',      label: 'Max Grid Count',       min: 10,  max: 150,  step: 1   },
           { key: 'shift_threshold_pct', label: 'Shift Threshold %',    min: 2,   max: 15,   step: 0.5 },
           { key: 'cooldown_min',        label: 'Cooldown (min)',        min: 15,  max: 240,  step: 15  },
@@ -719,7 +712,6 @@
             this.form.bitget_bot_id = d.bitget_bot_id || '';
             this.form.lower_price   = d.current_lower_price   || 0;
             this.form.upper_price   = d.current_upper_price   || 0;
-            this.form.grid_num      = d.current_grid_num      || 0;
             this.form.invest_amount = d.current_invest_amount || 0;
 
             const cfg = d.config || {};
@@ -776,7 +768,6 @@
                   passphrase:    this.form.passphrase,
                   lower_price:   this.form.lower_price,
                   upper_price:   this.form.upper_price,
-                  grid_num:      this.form.grid_num,
                   invest_amount: this.form.invest_amount,
                   config:        this.buildConfig(),
                 })
