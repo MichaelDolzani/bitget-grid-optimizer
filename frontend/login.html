@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitget Grid Optimizer — Login</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2300d4aa'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white'>&#x1F4CA;</text></svg>">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f1117;
+      --card:    #1a1d26;
+      --accent:  #00d4aa;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --border:  #2d3148;
+      --danger:  #f87171;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+      padding: 1.5rem;
+    }
+
+    .logo-block {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .logo-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #00d4aa22 0%, #00d4aa44 100%);
+      border: 1.5px solid var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .logo-icon svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .logo-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .logo-title span {
+      color: var(--accent);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem 2rem 2.25rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 1.75rem;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: var(--accent);
+      color: #0f1117;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-google:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .btn-google:active {
+      transform: translateY(0);
+    }
+
+    .btn-google svg {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .alert {
+      background: #f8717122;
+      border: 1px solid var(--danger);
+      border-radius: 6px;
+      color: var(--danger);
+      font-size: 0.8rem;
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    .checking-msg {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .checking-msg span {
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body x-data="loginApp()" x-init="init()">
+
+  <div class="login-wrap">
+    <div class="logo-block">
+      <div class="logo-icon">
+        <!-- Grid / chart icon -->
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="22" width="5" height="10" rx="1.5" fill="#00d4aa"/>
+          <rect x="11" y="14" width="5" height="18" rx="1.5" fill="#00d4aa" opacity=".75"/>
+          <rect x="18" y="8"  width="5" height="24" rx="1.5" fill="#00d4aa" opacity=".55"/>
+          <rect x="25" y="16" width="5" height="16" rx="1.5" fill="#00d4aa" opacity=".7"/>
+          <polyline points="6.5,20 13.5,12 20.5,6 27.5,14"
+            stroke="#00d4aa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="logo-title">Bitget Grid<br><span>Optimizer</span></div>
+    </div>
+
+    <div class="card">
+      <template x-if="checking">
+        <p class="checking-msg"><span>Verifica sessione in corso...</span></p>
+      </template>
+
+      <template x-if="!checking">
+        <div>
+          <template x-if="errorMsg">
+            <div class="alert" x-text="errorMsg"></div>
+          </template>
+
+          <p class="subtitle">Accedi con Google per continuare</p>
+
+          <a href="/auth/login" class="btn-google">
+            <!-- Google G logo -->
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.6 10.23c0-.68-.06-1.36-.17-2H10v3.79h5.4a4.6 4.6 0 01-2 3.02v2.5h3.23c1.9-1.74 3-4.3 3-7.31z" fill="#4285F4"/>
+              <path d="M10 20c2.7 0 4.97-.9 6.63-2.44l-3.23-2.5c-.9.6-2.04.95-3.4.95-2.6 0-4.8-1.76-5.6-4.12H1.08v2.58A9.98 9.98 0 0010 20z" fill="#34A853"/>
+              <path d="M4.4 11.89A6.02 6.02 0 014.08 10c0-.65.11-1.28.32-1.89V5.53H1.08A9.97 9.97 0 000 10c0 1.61.38 3.14 1.08 4.47l3.32-2.58z" fill="#FBBC05"/>
+              <path d="M10 3.96c1.47 0 2.8.5 3.84 1.5l2.88-2.88C14.96.99 12.7 0 10 0A9.98 9.98 0 001.08 5.53l3.32 2.58C5.2 5.72 7.4 3.96 10 3.96z" fill="#EA4335"/>
+            </svg>
+            Accedi con Google
+          </a>
+
+          <hr class="divider" />
+          <p class="footer-note">
+            Accesso riservato agli utenti autorizzati.<br>
+            I dati vengono trattati in conformità alla privacy policy.
+          </p>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <script>
+    function loginApp() {
+      return {
+        checking: true,
+        errorMsg: '',
+
+        async init() {
+          try {
+            const res = await fetch('/auth/me', { credentials: 'include' });
+            if (res.ok) {
+              window.location.href = 'dashboard.html';
+              return;
+            }
+            // 401 = not logged in, expected
+          } catch (e) {
+            // network error — still show login
+          }
+          this.checking = false;
+
+          // Show error message if redirected back with ?error=
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('error')) {
+            const msgs = {
+              access_denied: 'Accesso negato. Riprova.',
+              unauthorized:  'Account non autorizzato. Contatta l\'amministratore.',
+            };
+            this.errorMsg = msgs[params.get('error')] || 'Errore di autenticazione. Riprova.';
+          }
+        }
+      };
+    }
+  </script>
+</body>
+</html>

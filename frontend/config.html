@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitget Grid Optimizer — Configurazione</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2300d4aa'/><text x='16' y='23' font-size='20' text-anchor='middle' fill='white'>&#x1F4CA;</text></svg>">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0f1117;
+      --card:    #1a1d26;
+      --accent:  #00d4aa;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --border:  #2d3148;
+      --danger:  #f87171;
+      --warn:    #fbbf24;
+      --success: #4ade80;
+      --input-bg:#12151f;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar-left { display: flex; align-items: center; gap: 0.9rem; }
+
+    .topbar-logo {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .topbar-logo span { color: var(--accent); }
+    .topbar-sep { color: var(--border); }
+    .topbar-page { font-size: 0.82rem; color: var(--muted); }
+
+    .btn-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      padding: 0;
+      transition: opacity 0.15s;
+    }
+    .btn-link:hover { opacity: 0.7; text-decoration: underline; }
+
+    .main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 1.75rem 1.5rem 3rem;
+    }
+
+    .page-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 1.5rem;
+    }
+
+    .page-title small {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.75rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      padding: 0.6rem 1.1rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    .form-group { margin-bottom: 1.2rem; }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.88rem;
+      padding: 0.6rem 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--muted); }
+    .form-input:read-only { opacity: 0.6; cursor: default; }
+
+    select.form-input {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2rem;
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .form-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--border);
+      border-radius: 100px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .form-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1.5px var(--accent);
+    }
+
+    .form-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+    }
+
+    .slider-val {
+      min-width: 3rem;
+      text-align: right;
+      font-size: 0.88rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-label { font-size: 0.85rem; color: var(--text); }
+    .toggle-sub   { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
+
+    .toggle {
+      position: relative;
+      width: 38px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track { background: var(--accent); }
+
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track::after { transform: translateX(16px); }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1.25rem;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn:hover   { opacity: 0.85; transform: translateY(-1px); }
+    .btn:active  { transform: translateY(0); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-primary   { background: var(--accent); color: #0f1117; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+    .alert {
+      padding: 0.65rem 0.9rem;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      margin-top: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .alert-success { background: #00d4aa18; border: 1px solid #00d4aa55; color: var(--accent); }
+    .alert-error   { background: #f8717118; border: 1px solid #f8717155; color: var(--danger); }
+
+    .form-note {
+      font-size: 0.74rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      padding: 0.5rem 0.75rem;
+      border-left: 2px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 1.5rem 0 0.9rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .checkbox-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.3rem; }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .checkbox-item input[type=checkbox] {
+      accent-color: var(--accent);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .form-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.4rem;
+    }
+  </style>
+</head>
+<body x-data="configApp()" x-init="init()">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">Bitget Grid <span>Optimizer</span></div>
+      <span class="topbar-sep">/</span>
+      <span class="topbar-page" x-text="botId ? 'Bot #' + botId : 'Nuovo Bot'"></span>
+    </div>
+    <a class="btn-link" href="dashboard.html">← Dashboard</a>
+  </header>
+
+  <main class="main">
+    <div class="page-title">
+      <small x-text="botId ? 'Modifica bot' : 'Crea bot'"></small>
+      <span x-text="botId ? (form.symbol || 'Bot #' + botId) : 'Nuovo Bot'"></span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn" :class="tab === 0 && 'active'" @click="tab = 0">Connessione API</button>
+      <button class="tab-btn" :class="tab === 1 && 'active'" @click="tab = 1">Parametri Optimizer</button>
+      <button class="tab-btn" :class="tab === 2 && 'active'" @click="tab = 2">Gestione Fondi</button>
+      <button class="tab-btn" :class="tab === 3 && 'active'" @click="tab = 3">Notifiche</button>
+    </div>
+
+    <!-- Tab 0 — Connessione API -->
+    <div x-show="tab === 0">
+      <div class="form-group">
+        <label class="form-label">Symbol</label>
+        <input class="form-input" type="text" x-model="form.symbol" placeholder="BTCUSDT" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bitget Bot ID</label>
+        <input class="form-input" type="text" x-model="form.bitget_bot_id" placeholder="es. 123456789" />
+        <p class="form-note">Visibile nel pannello Bitget → Grid Bot → dettaglio bot.</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">API Key</label>
+        <input class="form-input" type="password" x-model="form.api_key"
+               :placeholder="botId ? '(invariata)' : '••••••••••'" autocomplete="new-password" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">API Secret</label>
+        <input class="form-input" type="password" x-model="form.api_secret"
+               :placeholder="botId ? '(invariata)' : '••••••••••'" autocomplete="new-password" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Passphrase</label>
+        <input class="form-input" type="password" x-model="form.passphrase"
+               :placeholder="botId ? '(invariata)' : '••••••••••'" autocomplete="new-password" />
+      </div>
+
+      <div class="section-title">Range attuale del bot</div>
+      <p class="form-note" style="margin-bottom:1rem;">
+        Leggi questi valori dal pannello Bitget (Grid Bot → dettaglio).
+        <span x-show="!!botId"> Dopo il primo salvataggio vengono aggiornati in automatico dall'optimizer.</span>
+      </p>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Lower Price (USDT)</label>
+          <input class="form-input" type="number" x-model.number="form.lower_price"
+                 step="any" :readonly="!!botId" placeholder="es. 80000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Upper Price (USDT)</label>
+          <input class="form-input" type="number" x-model.number="form.upper_price"
+                 step="any" :readonly="!!botId" placeholder="es. 120000" />
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label class="form-label">Grid Count</label>
+          <input class="form-input" type="number" x-model.number="form.grid_num"
+                 step="1" min="2" :readonly="!!botId" placeholder="es. 50" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Invest Amount (USDT)</label>
+          <input class="form-input" type="number" x-model.number="form.invest_amount"
+                 step="any" :readonly="!!botId" placeholder="es. 1000" />
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary"
+                :disabled="testing || !botId"
+                :title="!botId ? 'Salva prima il bot' : ''"
+                @click="testConnection()">
+          <template x-if="testing"><span class="spinner"></span></template>
+          Testa connessione
+        </button>
+        <button class="btn btn-primary" :disabled="saving.api" @click="saveApi()">
+          <template x-if="saving.api"><span class="spinner"></span></template>
+          <span x-text="botId ? 'Aggiorna' : 'Crea bot'"></span>
+        </button>
+      </div>
+
+      <template x-if="alerts.api">
+        <div class="alert" :class="alerts.api.ok ? 'alert-success' : 'alert-error'" x-text="alerts.api.msg"></div>
+      </template>
+    </div>
+
+    <!-- Tab 1 — Parametri Optimizer -->
+    <div x-show="tab === 1">
+      <template x-if="!botId">
+        <div class="alert alert-error" style="margin-bottom:1rem;">Crea prima il bot nel tab Connessione API.</div>
+      </template>
+
+      <template x-for="s in sliders" :key="s.key">
+        <div class="form-group">
+          <label class="form-label" x-text="s.label"></label>
+          <div class="slider-row">
+            <input class="form-slider" type="range"
+                   :min="s.min" :max="s.max" :step="s.step"
+                   x-model.number="form.params[s.key]" />
+            <span class="slider-val" x-text="form.params[s.key]"></span>
+          </div>
+        </div>
+      </template>
+
+      <hr class="form-divider" />
+
+      <div class="toggle-row" style="border-bottom:none; padding-bottom:0;">
+        <div>
+          <div class="toggle-label">TTM Squeeze guardrail</div>
+          <div class="toggle-sub">Blocca lo shift se il mercato e' compresso</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" x-model="form.params.ttm_squeeze_enabled" />
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <hr class="form-divider" />
+
+      <div class="form-group">
+        <label class="form-label">Grid Type</label>
+        <select class="form-input" x-model="form.params.grid_type">
+          <option value="geometric">Geometrica</option>
+          <option value="arithmetic">Aritmetica</option>
+        </select>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" :disabled="saving.params || !botId" @click="saveConfig()">
+          <template x-if="saving.params"><span class="spinner"></span></template>
+          Salva parametri
+        </button>
+      </div>
+
+      <template x-if="alerts.params">
+        <div class="alert" :class="alerts.params.ok ? 'alert-success' : 'alert-error'" x-text="alerts.params.msg"></div>
+      </template>
+    </div>
+
+    <!-- Tab 2 — Gestione Fondi -->
+    <div x-show="tab === 2">
+      <template x-if="!botId">
+        <div class="alert alert-error" style="margin-bottom:1rem;">Crea prima il bot nel tab Connessione API.</div>
+      </template>
+
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Fund Manager</div>
+          <div class="toggle-sub">Reinvestimento automatico dei fondi disponibili</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" x-model="form.funds.enabled" />
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div style="margin-top:1.25rem;">
+        <div class="form-group">
+          <label class="form-label">Soglia minima USDT</label>
+          <input class="form-input" type="number" x-model.number="form.funds.min_threshold" step="1" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Riserva %</label>
+          <input class="form-input" type="number" x-model.number="form.funds.reserve_pct" step="0.5" min="0" max="50" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Controllo ogni X ore</label>
+          <input class="form-input" type="number" x-model.number="form.funds.check_interval_hours" step="1" min="1" />
+        </div>
+      </div>
+
+      <p class="form-note">Il reinvestimento avviene max 1 volta ogni 24 ore.</p>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" :disabled="saving.funds || !botId" @click="saveConfig()">
+          <template x-if="saving.funds"><span class="spinner"></span></template>
+          Salva
+        </button>
+      </div>
+
+      <template x-if="alerts.funds">
+        <div class="alert" :class="alerts.funds.ok ? 'alert-success' : 'alert-error'" x-text="alerts.funds.msg"></div>
+      </template>
+    </div>
+
+    <!-- Tab 3 — Notifiche -->
+    <div x-show="tab === 3">
+      <template x-if="!botId">
+        <div class="alert alert-error" style="margin-bottom:1rem;">Crea prima il bot nel tab Connessione API.</div>
+      </template>
+
+      <div class="form-group">
+        <label class="form-label">Google Chat Webhook URL</label>
+        <input class="form-input" type="text" x-model="form.notify.webhook_url"
+               placeholder="https://chat.googleapis.com/v1/spaces/..." />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notifiche da ricevere</label>
+        <div class="checkbox-list">
+          <label class="checkbox-item">
+            <input type="checkbox" x-model="form.notify.events.shift_range" />
+            Shift range
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" x-model="form.notify.events.funds_added" />
+            Fondi aggiunti
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" x-model="form.notify.events.ttm_squeeze_skip" />
+            TTM Squeeze skip
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" x-model="form.notify.events.errors" />
+            Errori
+          </label>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" :disabled="testingNotify || !botId" @click="testNotification()">
+          <template x-if="testingNotify"><span class="spinner"></span></template>
+          Invia messaggio di test
+        </button>
+        <button class="btn btn-primary" :disabled="saving.notify || !botId" @click="saveConfig()">
+          <template x-if="saving.notify"><span class="spinner"></span></template>
+          Salva
+        </button>
+      </div>
+
+      <template x-if="alerts.notify">
+        <div class="alert" :class="alerts.notify.ok ? 'alert-success' : 'alert-error'" x-text="alerts.notify.msg"></div>
+      </template>
+    </div>
+
+  </main>
+
+  <script>
+    function configApp() {
+      return {
+        botId: null,
+        tab: 0,
+        testing: false,
+        testingNotify: false,
+        saving: { api: false, params: false, funds: false, notify: false },
+        alerts: { api: null, params: null, funds: null, notify: null },
+
+        form: {
+          symbol:        'BTCUSDT',
+          bitget_bot_id: '',
+          api_key:       '',
+          api_secret:    '',
+          passphrase:    '',
+          lower_price:   0,
+          upper_price:   0,
+          grid_num:      0,
+          invest_amount: 0,
+
+          params: {
+            atr_multiplier:       2.5,
+            sigma_multiplier:     1.5,
+            step_target_pct:      0.8,
+            max_grid_count:       150,
+            shift_threshold_pct:  5.0,
+            cooldown_min:         60,
+            check_interval_min:   30,
+            ttm_squeeze_enabled:  true,
+            grid_type:            'geometric',
+          },
+          funds: {
+            enabled:              true,
+            min_threshold:        10,
+            reserve_pct:          2,
+            check_interval_hours: 6,
+          },
+          notify: {
+            webhook_url: '',
+            events: {
+              shift_range:      true,
+              funds_added:      true,
+              ttm_squeeze_skip: true,
+              errors:           true,
+            }
+          }
+        },
+
+        sliders: [
+          { key: 'atr_multiplier',      label: 'ATR Multiplier',       min: 1.0, max: 4.0,  step: 0.1 },
+          { key: 'sigma_multiplier',    label: 'Sigma Multiplier',     min: 0.5, max: 3.0,  step: 0.1 },
+          { key: 'step_target_pct',     label: 'Step Target %',        min: 0.4, max: 2.0,  step: 0.1 },
+          { key: 'max_grid_count',      label: 'Max Grid Count',       min: 10,  max: 150,  step: 1   },
+          { key: 'shift_threshold_pct', label: 'Shift Threshold %',    min: 2,   max: 15,   step: 0.5 },
+          { key: 'cooldown_min',        label: 'Cooldown (min)',        min: 15,  max: 240,  step: 15  },
+          { key: 'check_interval_min',  label: 'Check Interval (min)', min: 5,   max: 120,  step: 5   },
+        ],
+
+        buildConfig() {
+          return {
+            fund_manager_enabled:       this.form.funds.enabled,
+            grid_type:                  this.form.params.grid_type,
+            atr_multiplier:             this.form.params.atr_multiplier,
+            sigma_multiplier:           this.form.params.sigma_multiplier,
+            step_target_pct:            this.form.params.step_target_pct,
+            max_grid_count:             this.form.params.max_grid_count,
+            shift_threshold_pct:        this.form.params.shift_threshold_pct,
+            cooldown_minutes:           this.form.params.cooldown_min,
+            check_interval_minutes:     this.form.params.check_interval_min,
+            ttm_squeeze_enabled:        this.form.params.ttm_squeeze_enabled,
+            min_add_funds_usdt:         this.form.funds.min_threshold,
+            reserve_pct:                this.form.funds.reserve_pct,
+            fund_check_interval_hours:  this.form.funds.check_interval_hours,
+            gchat_webhook_url:          this.form.notify.webhook_url,
+          };
+        },
+
+        async init() {
+          try {
+            const res = await fetch('/auth/me', { credentials: 'include' });
+            if (!res.ok) { window.location.href = 'login.html'; return; }
+          } catch {
+            window.location.href = 'login.html';
+            return;
+          }
+          const params = new URLSearchParams(window.location.search);
+          const id = params.get('bot_id');
+          if (id) {
+            this.botId = parseInt(id);
+            await this.loadBot(this.botId);
+          }
+        },
+
+        async loadBot(id) {
+          try {
+            const res = await fetch(`/api/bots/${id}`, { credentials: 'include' });
+            if (!res.ok) return;
+            const d = await res.json();
+            this.form.symbol        = d.symbol        || 'BTCUSDT';
+            this.form.bitget_bot_id = d.bitget_bot_id || '';
+            this.form.lower_price   = d.current_lower_price   || 0;
+            this.form.upper_price   = d.current_upper_price   || 0;
+            this.form.grid_num      = d.current_grid_num      || 0;
+            this.form.invest_amount = d.current_invest_amount || 0;
+
+            const cfg = d.config || {};
+            this.form.params.grid_type            = cfg.grid_type            ?? 'geometric';
+            this.form.params.atr_multiplier       = cfg.atr_multiplier       ?? 2.5;
+            this.form.params.sigma_multiplier     = cfg.sigma_multiplier     ?? 1.5;
+            this.form.params.step_target_pct      = cfg.step_target_pct      ?? 0.8;
+            this.form.params.max_grid_count       = cfg.max_grid_count       ?? 150;
+            this.form.params.shift_threshold_pct  = cfg.shift_threshold_pct  ?? 5.0;
+            this.form.params.cooldown_min         = cfg.cooldown_minutes     ?? 60;
+            this.form.params.check_interval_min   = cfg.check_interval_minutes ?? 30;
+            this.form.params.ttm_squeeze_enabled  = cfg.ttm_squeeze_enabled  ?? true;
+            this.form.funds.enabled               = cfg.fund_manager_enabled ?? true;
+            this.form.funds.min_threshold         = cfg.min_add_funds_usdt   ?? 10;
+            this.form.funds.reserve_pct           = cfg.reserve_pct          ?? 2;
+            this.form.funds.check_interval_hours  = cfg.fund_check_interval_hours ?? 6;
+            this.form.notify.webhook_url          = cfg.gchat_webhook_url    ?? '';
+          } catch { /* use defaults */ }
+        },
+
+        async saveApi() {
+          this.saving.api = true;
+          this.alerts.api = null;
+          try {
+            if (this.botId) {
+              // PUT — can only update symbol and config (credentials not re-settable via PUT)
+              const res = await fetch(`/api/bots/${this.botId}`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symbol: this.form.symbol, config: this.buildConfig() })
+              });
+              const data = await res.json().catch(() => ({}));
+              this.alerts.api = res.ok
+                ? { ok: true,  msg: 'Bot aggiornato.' }
+                : { ok: false, msg: data.detail || 'Errore nel salvataggio.' };
+            } else {
+              // POST — create new bot
+              const res = await fetch('/api/bots', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  symbol:        this.form.symbol,
+                  bitget_bot_id: this.form.bitget_bot_id,
+                  api_key:       this.form.api_key,
+                  api_secret:    this.form.api_secret,
+                  passphrase:    this.form.passphrase,
+                  lower_price:   this.form.lower_price,
+                  upper_price:   this.form.upper_price,
+                  grid_num:      this.form.grid_num,
+                  invest_amount: this.form.invest_amount,
+                  config:        this.buildConfig(),
+                })
+              });
+              const data = await res.json().catch(() => ({}));
+              if (res.ok && data.id) {
+                this.botId = data.id;
+                history.replaceState(null, '', `?bot_id=${this.botId}`);
+                this.alerts.api = { ok: true, msg: 'Bot creato con successo. ID: ' + this.botId };
+              } else {
+                this.alerts.api = { ok: false, msg: data.detail || 'Errore nella creazione.' };
+              }
+            }
+          } catch (e) {
+            this.alerts.api = { ok: false, msg: 'Errore di rete: ' + e.message };
+          } finally {
+            this.saving.api = false;
+          }
+        },
+
+        async saveConfig() {
+          const tab = this.tab;
+          const key = tab === 1 ? 'params' : tab === 2 ? 'funds' : 'notify';
+          this.saving[key] = true;
+          this.alerts[key] = null;
+          try {
+            const res = await fetch(`/api/bots/${this.botId}`, {
+              method: 'PUT',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ config: this.buildConfig() })
+            });
+            const data = await res.json().catch(() => ({}));
+            this.alerts[key] = res.ok
+              ? { ok: true,  msg: 'Salvato.' }
+              : { ok: false, msg: data.detail || 'Errore nel salvataggio.' };
+          } catch (e) {
+            this.alerts[key] = { ok: false, msg: 'Errore di rete: ' + e.message };
+          } finally {
+            this.saving[key] = false;
+          }
+        },
+
+        async testConnection() {
+          this.testing = true;
+          this.alerts.api = null;
+          try {
+            const res = await fetch(`/api/bots/${this.botId}/test-connection`, {
+              method: 'POST',
+              credentials: 'include',
+            });
+            const data = await res.json().catch(() => ({}));
+            this.alerts.api = res.ok
+              ? { ok: true,  msg: `Connessione OK — ${data.symbol} @ $${data.price}` }
+              : { ok: false, msg: data.detail || 'Test fallito.' };
+          } catch (e) {
+            this.alerts.api = { ok: false, msg: 'Errore di rete: ' + e.message };
+          } finally {
+            this.testing = false;
+          }
+        },
+
+        async testNotification() {
+          this.testingNotify = true;
+          this.alerts.notify = null;
+          try {
+            const res = await fetch(`/api/bots/${this.botId}/test-notification`, {
+              method: 'POST',
+              credentials: 'include',
+            });
+            const data = await res.json().catch(() => ({}));
+            this.alerts.notify = res.ok
+              ? { ok: true,  msg: 'Messaggio di test inviato.' }
+              : { ok: false, msg: data.detail || 'Invio fallito.' };
+          } catch (e) {
+            this.alerts.notify = { ok: false, msg: 'Errore di rete: ' + e.message };
+          } finally {
+            this.testingNotify = false;
+          }
+        },
+      };
+    }
+  </script>
+</body>
+</html>
